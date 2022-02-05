@@ -13,35 +13,11 @@ int main(){
 
 
 
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImPlot::CreateContext();
-    ImGuiIO &io = ImGui::GetIO();
-    // Setup Platform/Renderer bindings
-    ImGui_ImplGlfw_InitForOpenGL(win.GetContextPointer(), true);
-    ImGui_ImplOpenGL3_Init("#version 330 core");
-    // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
-
-
-    win.SetPreDrawingLoop([&](Window& window){
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-    });
-
-     win.SetPostDrawingLoop([&](Window& window){
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    });    
+    GuiLayer::Init(win);
 
     win.SetDrawingLoop([&](Window& window){
         
-        ImGui::Begin("Hello");
-
-            
-
-        ImGui::End();
+        
 
 
     });

@@ -40,23 +40,6 @@ project("SimuDraco")
             
             
 
-# repository download for imgui...
-                    
-dir_exists(imgui_exists ${PROJECT_SOURCE_DIR}/vendor/imgui)
-
-if(NOT ${imgui_exists})
-    FetchContent_Declare(IMGUI
-    GIT_REPOSITORY https://github.com/ocornut/imgui
-    GIT_TAG origin/master
-    SOURCE_DIR ${PROJECT_SOURCE_DIR}/vendor/imgui
-    )
-
-    FetchContent_MakeAvailable(IMGUI)
-
-endif()
-                    
-                    
-
 # repository download for glfw...
                     
 dir_exists(glfw_exists ${PROJECT_SOURCE_DIR}/vendor/glfw)
@@ -145,6 +128,44 @@ if(NOT ${implot_exists})
 endif()
                     
                     
+
+# repository download for pybind11...
+                    
+dir_exists(pybind11_exists ${PROJECT_SOURCE_DIR}/vendor/pybind11)
+
+if(NOT ${pybind11_exists})
+    ExternalProject_Add(PYBIND11
+    GIT_REPOSITORY https://github.com/pybind/pybind11
+    GIT_TAG v2.9.1
+    CMAKE_ARGS  -DCMAKE_INSTALL_PREFIX:PATH=${PROJECT_SOURCE_DIR}/vendor/pybind11
+                -DPYBIND11_TEST=OFF
+                        
+    BUILD_BYPRODUCTS 
+    )
+
+    list(APPEND DEPS_TO_BUILD PYBIND11)
+
+endif()
+
+
+                    
+
+# repository download for imgui...
+                    
+dir_exists(imgui_exists ${PROJECT_SOURCE_DIR}/vendor/imgui)
+
+if(NOT ${imgui_exists})
+    FetchContent_Declare(IMGUI
+    GIT_REPOSITORY https://github.com/ocornut/imgui
+    GIT_TAG origin/master
+    SOURCE_DIR ${PROJECT_SOURCE_DIR}/vendor/imgui
+    )
+
+    FetchContent_MakeAvailable(IMGUI)
+
+endif()
+                    
+                    
 #finding packages...            
 
     find_package(OpenGL REQUIRED)
@@ -174,6 +195,7 @@ add_executable(${PROJECT_NAME}
 	${PROJECT_SOURCE_DIR}/vendor/imgui/backends/imgui_impl_opengl3.cpp
 	${PROJECT_SOURCE_DIR}/vendor/implot/implot.cpp
 	${PROJECT_SOURCE_DIR}/vendor/implot/implot_items.cpp
+	${PROJECT_SOURCE_DIR}/source/gui/gui_layer.cpp
 )
         
 #setting c/cpp standard
@@ -215,9 +237,6 @@ endforeach()
 #------------ include directories -------------
 
             
-    target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/vendor/imgui)
-    
-
     target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/vendor/glfw/include)
     
 
@@ -231,6 +250,12 @@ endforeach()
     
 
     target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/vendor/implot)
+    
+
+    target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/vendor/pybind11/include)
+    
+
+    target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/vendor/imgui)
     
 
     target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/vendor)
