@@ -1,8 +1,10 @@
 #include <iostream>
 #include "kv.h"
 
+namespace py = pybind11;
 
 int main(){
+    
     WindowCreationProperties prop;
     prop.title = "Hey I'm a window!";
     prop.width = 1280;
@@ -10,19 +12,12 @@ int main(){
     prop.windowFlags = WindowFlag::NotResizeable;
 
     Window& win = Registry::Create().MainWindow(prop);
-
-
-
+    
+    PythonLayer::Init();
     GuiLayer::Init(win);
-
-    win.SetDrawingLoop([&](Window& window){
-        
-        
-
-
-    });
 
     Registry::MainLoop();
     
+    GuiLayer::Cleanup();
     
 }

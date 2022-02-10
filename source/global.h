@@ -4,6 +4,9 @@
 #include <optional>
 #include <memory>
 #include <unordered_map>
+#include "pybind11/pybind11.h"
+#include "pybind11/stl.h"
+#include "pybind11/embed.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/quaternion.hpp"
 #include "glm/gtx/quaternion.hpp"
@@ -16,6 +19,7 @@
 #include "implot.h"
 #include "misc/cpp/imgui_stdlib.h"
 #include "thread_pool.hpp"
+#include "nfd.hpp"
 #include "general/structures.h"
 #include "general/color.h"
 

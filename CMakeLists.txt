@@ -32,7 +32,7 @@ include(FetchContent)
 set(DEPS_TO_BUILD )
 
 #project name
-project("SimuDraco")
+project("SimDraco")
         
         
             
@@ -134,20 +134,16 @@ endif()
 dir_exists(pybind11_exists ${PROJECT_SOURCE_DIR}/vendor/pybind11)
 
 if(NOT ${pybind11_exists})
-    ExternalProject_Add(PYBIND11
+    FetchContent_Declare(PYBIND11
     GIT_REPOSITORY https://github.com/pybind/pybind11
     GIT_TAG v2.9.1
-    CMAKE_ARGS  -DCMAKE_INSTALL_PREFIX:PATH=${PROJECT_SOURCE_DIR}/vendor/pybind11
-                -DPYBIND11_TEST=OFF
-                        
-    BUILD_BYPRODUCTS 
+    SOURCE_DIR ${PROJECT_SOURCE_DIR}/vendor/pybind11
     )
 
-    list(APPEND DEPS_TO_BUILD PYBIND11)
+    FetchContent_MakeAvailable(PYBIND11)
 
 endif()
-
-
+                    
                     
 
 # repository download for imgui...
@@ -166,9 +162,30 @@ if(NOT ${imgui_exists})
 endif()
                     
                     
+
+# repository download for nfd...
+                    
+dir_exists(nfd_exists ${PROJECT_SOURCE_DIR}/vendor/nfd)
+
+if(NOT ${nfd_exists})
+    ExternalProject_Add(NFD
+    GIT_REPOSITORY https://github.com/btzy/nativefiledialog-extended
+    GIT_TAG origin/master
+    CMAKE_ARGS  -DCMAKE_INSTALL_PREFIX:PATH=${PROJECT_SOURCE_DIR}/vendor/nfd
+    BUILD_BYPRODUCTS ${PROJECT_SOURCE_DIR}/vendor/nfd/lib/${CMAKE_STATIC_LIBRARY_PREFIX}nfd${CMAKE_STATIC_LIBRARY_SUFFIX}
+    )
+
+    list(APPEND DEPS_TO_BUILD NFD)
+
+endif()
+
+
+                    
 #finding packages...            
 
-    find_package(OpenGL REQUIRED)
+find_package(OpenGL REQUIRED)
+
+find_package(Python COMPONENTS Development Interpreter REQUIRED)
 
 
 #creating executable
@@ -196,6 +213,9 @@ add_executable(${PROJECT_NAME}
 	${PROJECT_SOURCE_DIR}/vendor/implot/implot.cpp
 	${PROJECT_SOURCE_DIR}/vendor/implot/implot_items.cpp
 	${PROJECT_SOURCE_DIR}/source/gui/gui_layer.cpp
+	${PROJECT_SOURCE_DIR}/source/python_layer/python_layer.cpp
+	${PROJECT_SOURCE_DIR}/source/module.cpp
+	${PROJECT_SOURCE_DIR}/source/general/structures.cpp
 )
         
 #setting c/cpp standard
@@ -228,10 +248,22 @@ endforeach()
     target_link_libraries(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/vendor/glew/lib/${CMAKE_STATIC_LIBRARY_PREFIX}glew$<$<CONFIG:Debug>:d>${CMAKE_STATIC_LIBRARY_SUFFIX})
                 
 
+    #linking for nfd...
+
+
+    target_link_libraries(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/vendor/nfd/lib/${CMAKE_STATIC_LIBRARY_PREFIX}nfd${CMAKE_STATIC_LIBRARY_SUFFIX})
+                
+
     #linking for OpenGL...
 
 
     target_link_libraries(${PROJECT_NAME} PUBLIC ${OPENGL_LIBRARIES})
+                
+
+    #linking for Python...
+
+
+    target_link_libraries(${PROJECT_NAME} PUBLIC ${Python_LIBRARIES})
                 
 
 #------------ include directories -------------
@@ -256,6 +288,12 @@ endforeach()
     
 
     target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/vendor/imgui)
+    
+
+    target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/vendor/nfd/include)
+    
+
+    target_include_directories(${PROJECT_NAME} PUBLIC ${Python_INCLUDE_DIRS})
     
 
     target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/vendor)
