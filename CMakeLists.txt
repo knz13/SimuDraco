@@ -214,7 +214,6 @@ add_executable(${PROJECT_NAME}
 	${PROJECT_SOURCE_DIR}/vendor/implot/implot_items.cpp
 	${PROJECT_SOURCE_DIR}/source/gui/gui_layer.cpp
 	${PROJECT_SOURCE_DIR}/source/python_layer/python_layer.cpp
-	${PROJECT_SOURCE_DIR}/source/module.cpp
 	${PROJECT_SOURCE_DIR}/source/general/structures.cpp
 )
         
@@ -300,4 +299,15 @@ endforeach()
     
 
     target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/source)
+    
+
+#------------ custom commands ----------------
+            
+
+    #custom command for alias build_python_library...
+                
+    add_custom_command(TARGET ${PROJECT_NAME}
+                       POST_BUILD
+                       COMMAND pip install .  WORKING DIRECTORY ${PROJECT_SOURCE_DIR}
+                       )
     

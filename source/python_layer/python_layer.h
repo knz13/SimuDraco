@@ -9,6 +9,7 @@ public:
 
 private:
     static py::scoped_interpreter m_Interpreter;
+    static py::module m_Module;
 };
 
 

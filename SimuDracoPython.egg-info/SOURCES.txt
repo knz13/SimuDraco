@@ -1,6 +1,0 @@
-setup.py
-SimuDracoPython.egg-info/PKG-INFO
-SimuDracoPython.egg-info/SOURCES.txt
-SimuDracoPython.egg-info/dependency_links.txt
-SimuDracoPython.egg-info/top_level.txt
-source/module.cpp
