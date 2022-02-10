@@ -220,7 +220,7 @@ add_executable(${PROJECT_NAME}
         
 #setting c/cpp standard
 
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 20)
 
         
 #adding dependencies

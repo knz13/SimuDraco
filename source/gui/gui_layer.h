@@ -16,6 +16,6 @@ private:
     static std::unordered_map<std::string,std::vector<std::function<void()>>> m_Graphs;
     static std::string m_CurrentGraphName;
     static ImGuiIO* m_IO;
-    
+    static NFD::Guard m_FileDialogHandle;
 
 };

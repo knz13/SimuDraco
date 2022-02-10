@@ -2,6 +2,8 @@
 #include <iostream>
 #include <future>
 #include <optional>
+#include <filesystem>
+#include <format>
 #include <memory>
 #include <unordered_map>
 #include "pybind11/pybind11.h"
@@ -77,8 +79,15 @@ static bool GetGLError(int line,std::string file){
 
 #ifdef NDEBUG
     #define GL_CALL(x) x 
+    
 #else
     #define GL_CALL(x) ClearGLErrors(); x; if(GetGLError(__LINE__,__FILE__)) {__debugbreak();}
+    
 #endif
+
+#define PY_CALL(x) try { x; } catch(py::error_already_set &e){std::cout << e.what() << std::endl;}
+#define PY_ASSERT(x) try { x; } catch(py::error_already_set &e){std::cout << e.what() << std::endl; return false;}
+
+
 
 

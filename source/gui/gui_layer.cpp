@@ -4,6 +4,7 @@
 ImGuiIO* GuiLayer::m_IO = nullptr;
 std::unordered_map<std::string,std::vector<std::function<void()>>> GuiLayer::m_Graphs;
 std::string GuiLayer::m_CurrentGraphName;
+NFD::Guard GuiLayer::m_FileDialogHandle;
 
 bool GuiLayer::Init(Window& win) {
     if(m_IO != nullptr){
@@ -72,8 +73,13 @@ void GuiLayer::CreatePropertiesPanel(Window& win) {
     if(ImGui::BeginMenuBar()){
         if(ImGui::BeginMenu("Menu")){
             
-            if(ImGui::MenuItem("Hello")){
-                
+            if(ImGui::MenuItem("Add Python File")){
+                NFD::UniquePath outPath;
+                nfdfilteritem_t filter[] = {{"Python File","py"}};
+                nfdresult_t result = NFD::OpenDialog(outPath,filter,1,std::filesystem::current_path().string().c_str());
+                if(result == NFD_OKAY){
+                    PythonLayer::LoadPythonFile(outPath.get());
+                }
             }
             ImGui::EndMenu();
         }

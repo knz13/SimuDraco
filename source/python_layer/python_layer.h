@@ -5,7 +5,7 @@ namespace py = pybind11;
 class PythonLayer {
 public:
     static void Init();
-    
+    static bool LoadPythonFile(std::string filepath);
 
 private:
     static py::scoped_interpreter m_Interpreter;
