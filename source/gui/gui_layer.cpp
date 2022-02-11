@@ -2,9 +2,9 @@
 #include "gui_layer.h"
 
 ImGuiIO* GuiLayer::m_IO = nullptr;
-std::unordered_map<std::string,std::vector<std::function<void()>>> GuiLayer::m_Graphs;
-std::string GuiLayer::m_CurrentGraphName;
 NFD::Guard GuiLayer::m_FileDialogHandle;
+std::unordered_map<std::string,GuiTab> GuiLayer::m_Tabs = {{"None",GuiTab()}};
+std::string GuiLayer::m_CurrentTab = "None";
 
 bool GuiLayer::Init(Window& win) {
     if(m_IO != nullptr){
@@ -34,6 +34,8 @@ bool GuiLayer::Init(Window& win) {
     });
 
     win.PostDrawingLoop().Connect([&](Window& window){
+        UpdateGraphs();
+
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     });
@@ -41,6 +43,7 @@ bool GuiLayer::Init(Window& win) {
 }
 
 void GuiLayer::Cleanup() {
+    m_Tabs.clear();
     
 }
 
@@ -57,13 +60,7 @@ void GuiLayer::CreateGraphPanel(Window& win) {
     ImGui::End();
 }
 
-bool GuiLayer::SetCurrentGraph(std::string graphName) {
-    if(m_Graphs.find(graphName) != m_Graphs.end()){
-        m_CurrentGraphName = graphName;
-        return true;
-    }
-    return false;
-}
+
 
 void GuiLayer::CreatePropertiesPanel(Window& win) {
     ImGui::Begin("Properties",NULL,ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_MenuBar);
@@ -86,8 +83,39 @@ void GuiLayer::CreatePropertiesPanel(Window& win) {
 
         ImGui::EndMenuBar();
     }
+
+
+    for(auto& func : m_Tabs[m_CurrentTab].propertiesFunctions){
+        func.second(m_Tabs[m_CurrentTab].objectReference);
+    }
     
 
 
     ImGui::End();
+}
+
+
+GuiTab& GuiLayer::CreateTab(std::string name) {
+    m_Tabs[name] = GuiTab();
+    m_Tabs[name].name = name;
+    return m_Tabs[name];    
+}
+bool GuiLayer::DeleteTab(std::string name) {
+    if(m_Tabs.find(name) == m_Tabs.end()){
+        return false;
+    }
+    m_Tabs.erase(name);
+    return true;
+}
+
+void GuiLayer::SetCurrentTab(std::string tabName) {
+    if(m_Tabs.find(tabName) != m_Tabs.end()){
+        m_CurrentTab = tabName;
+    }   
+}
+
+void GuiLayer::UpdateGraphs() {
+    for(auto& graph : m_Tabs[m_CurrentTab].graphingFunctions){
+        
+    }
 }

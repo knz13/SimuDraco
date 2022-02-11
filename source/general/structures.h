@@ -1,8 +1,12 @@
 #pragma once
 #include <iostream>
 #include <unordered_map>
+#include <map>
 #include <functional>
+
 #include "pybind11/pybind11.h"
+
+namespace py = pybind11;
 
 enum WindowFlag {
 
@@ -38,9 +42,37 @@ struct WindowCreationProperties {
     int openGLVersionMinor = 0;
 };
 
+namespace GraphType {
+    enum PythonGraphTypes {
+        Bars=0,
+        Lines=1
+    };
+};
+
+struct PythonGraphWrapper {
+    std::string name = "";
+    GraphType::PythonGraphTypes graphType = GraphType::Bars;
+    std::function<std::map<std::string,float>(py::object,float)> graphUpdateFunction = [](py::object obj,float deltaTime){return std::map<std::string,float>();};
+};
+
+struct GuiGraphWrapper {
+    std::function<void()> graphFunction = [](){};
+    std::map<std::string,std::vector<float>> graphData;
+    PythonGraphWrapper wrapper;
+};
 
 
 
+
+
+struct GuiTab {
+
+    std::string name= "";
+    py::object objectReference;
+    std::unordered_map<std::string,GuiGraphWrapper> graphingFunctions;
+    std::unordered_map<std::string,std::function<void(py::object)>> propertiesFunctions;
+
+};
 
 
 class Window;

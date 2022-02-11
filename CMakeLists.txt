@@ -32,7 +32,7 @@ include(FetchContent)
 set(DEPS_TO_BUILD )
 
 #project name
-project("SimDraco")
+project("SimuDraco")
         
         
             
@@ -299,15 +299,4 @@ endforeach()
     
 
     target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/source)
-    
-
-#------------ custom commands ----------------
-            
-
-    #custom command for alias build_python_library...
-                
-    add_custom_command(TARGET ${PROJECT_NAME}
-                       POST_BUILD
-                       COMMAND pip install .  WORKING DIRECTORY ${PROJECT_SOURCE_DIR}
-                       )
     
