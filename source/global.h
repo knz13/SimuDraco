@@ -6,9 +6,13 @@
 #include <format>
 #include <memory>
 #include <unordered_map>
+#include <algorithm>
 #include "pybind11/pybind11.h"
 #include "pybind11/stl.h"
 #include "pybind11/embed.h"
+#include "pybind11/functional.h"
+#include "pybind11/chrono.h"
+#include "pybind11/complex.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/quaternion.hpp"
 #include "glm/gtx/quaternion.hpp"
@@ -49,7 +53,7 @@ static unsigned int TestSize(unsigned int dataType) {
 }
 
 
-#define LOG(x) cout << "LOG: " << x << endl <<  "At line: "<< __LINE__ << endl << "In file: " << __FILE__ << endl
+#define LOG_TO_USER(x) cout << "LOG: " << x << endl <<  "At line: "<< __LINE__ << endl << "In file: " << __FILE__ << endl
 
 
 #ifdef NDEBUG
@@ -88,7 +92,7 @@ static bool GetGLError(int line,std::string file){
 
 
 #define PY_CALL(x) try { x; } catch(py::error_already_set &e){std::cout << e.what() << std::endl;}
-#define PY_ASSERT(x) [&](){try { x; return true; } catch(py::error_already_set &e){std::cout << e.what() << std::endl; return false;}}()
+#define PY_ASSERT(x) [&](){try { x; return true; } catch(py::error_already_set &e){DEBUG_LOG(e.what()); return false;}}()
 
 
 

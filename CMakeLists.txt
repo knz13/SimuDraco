@@ -300,3 +300,14 @@ endforeach()
 
     target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/source)
     
+
+#------------ custom commands ----------------
+            
+
+    #custom command for alias install_module...
+                
+    add_custom_command(TARGET ${PROJECT_NAME}
+                       POST_BUILD
+                       COMMAND pip install ${PROJECT_SOURCE_DIR}
+                       )
+    

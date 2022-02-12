@@ -1,5 +1,5 @@
-#include "../kv.h"
 #include "gui_layer.h"
+#include "../kv.h"
 
 ImGuiIO* GuiLayer::m_IO = nullptr;
 NFD::Guard GuiLayer::m_FileDialogHandle;
@@ -24,9 +24,12 @@ bool GuiLayer::Init(Window& win) {
     ImGui::StyleColorsDark();
 
     win.PreDrawingLoop().Connect([&](Window& window){
+        UpdateGraphs();
+        
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+
 
         CreateGraphPanel(win);
         CreatePropertiesPanel(win);
@@ -34,7 +37,7 @@ bool GuiLayer::Init(Window& win) {
     });
 
     win.PostDrawingLoop().Connect([&](Window& window){
-        UpdateGraphs();
+        
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -52,7 +55,9 @@ void GuiLayer::CreateGraphPanel(Window& win) {
     ImGui::SetWindowSize(ImVec2(4*win.Properties().width/6,win.Properties().height));
     ImGui::SetWindowPos(ImVec2(0,0));
 
-    
+    for(auto& graphWrapper : m_Tabs[m_CurrentTab].graphingFunctions){
+        graphWrapper.second.graphFunction(graphWrapper.second.graphData);
+    }
 
 
     
@@ -115,7 +120,20 @@ void GuiLayer::SetCurrentTab(std::string tabName) {
 }
 
 void GuiLayer::UpdateGraphs() {
-    for(auto& graph : m_Tabs[m_CurrentTab].graphingFunctions){
-        
+    
+    for(auto& graphWrapper : m_Tabs[m_CurrentTab].graphingFunctions){
+        py::object dictWithGraphData;
+        PY_CALL(dictWithGraphData = graphWrapper.second.wrapper.graphUpdateFunction(Registry::Get().DeltaTime()));
+
+        std::map<std::string,float> mapWithData;
+        if(!PY_ASSERT((mapWithData = dictWithGraphData.cast<std::map<std::string,float>>()))){
+            LOG_TO_USER("Result of function from graph: " << graphWrapper.first << " was not equal to a dict with string keys and float values");
+            continue;
+        }
+
+        for(auto& value : mapWithData){
+            graphWrapper.second.graphData[value.first].push_back(value.second);
+        }
+
     }
 }

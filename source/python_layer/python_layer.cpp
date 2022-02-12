@@ -1,22 +1,24 @@
 #include "python_layer.h"
 #include "../kv.h"
 
+
 PYBIND11_EMBEDDED_MODULE(SimuDracoPython,m){
     m.doc() = "Simulador para draco";
-    m.attr("a") = 2;
 
     py::enum_<GraphType::PythonGraphTypes>(m,"GraphType")
         .value("Bars",GraphType::Bars)
         .value("Lines",GraphType::Lines)
         .export_values();
-
+    
     py::class_<PythonGraphWrapper>(m,"Graph")
-        .def(py::init<>([](){return PythonGraphWrapper();}))
+        .def(py::init<>())
         .def_readwrite("name",&PythonGraphWrapper::name)
         .def_readwrite("graph_type",&PythonGraphWrapper::graphType)
         .def_readwrite("graph_function",&PythonGraphWrapper::graphUpdateFunction);
+    
 
 };
+
 
 py::scoped_interpreter PythonLayer::m_Interpreter;
 py::module PythonLayer::m_Module;
@@ -49,7 +51,7 @@ def get_public_variable_names(variable):
 bool PythonLayer::PythonLayer::LoadPythonFile(std::string filepath) {
     py::dict locals;
 
-    //py::globals().attr("__builtins__").cast<py::module>().import("SimuDracoPython");
+    
     PY_CALL(py::eval_file(filepath,py::globals(),locals));
 
     PY_CALL(std::cout << py::str(locals) << std::endl);
@@ -110,10 +112,19 @@ std::string PythonLayer::PythonLayer::GetVariableTypeName(py::object obj, std::s
 
 bool PythonLayer::HandleProperties(py::object obj, std::string varName,std::string varType, GuiTab& tab) {
     
+    std::string showName = varName;
+    std::string test = showName.substr(0,2);
+    if(showName.substr(0,2) == "m_"){
+        showName = showName.substr(2,showName.size() - 2);
+    }
+    std::replace(showName.begin(),showName.end(),'_',' ');
+
+
+
     if(varType == "int"){
         tab.propertiesFunctions[varName] = [=](py::object thisObj){
             int var = thisObj.attr(py::str(varName)).cast<int>();
-            ImGui::InputInt(varName.c_str(),&var);
+            ImGui::InputInt(showName.c_str(),&var);
             thisObj.attr(py::str(varName)) = var;
         };
         return true;
@@ -121,7 +132,7 @@ bool PythonLayer::HandleProperties(py::object obj, std::string varName,std::stri
     else if(varType == "float"){
         tab.propertiesFunctions[varName] = [=](py::object thisObj){
             float var = thisObj.attr(py::str(varName)).cast<float>();
-            ImGui::InputFloat(varName.c_str(),&var);
+            ImGui::InputFloat(showName.c_str(),&var);
             thisObj.attr(py::str(varName)) = var;
         };
         return true;
@@ -141,9 +152,14 @@ bool PythonLayer::HandleGraphs(py::object obj, std::string varName, GuiTab& tab)
         return false;
     }
     GuiGraphWrapper graphWrapper;
+    graphWrapper.wrapper = wrapper;
     switch(wrapper.graphType){
     case GraphType::Bars:
-        graphWrapper.graphFunction = std::bind([=](std::map<std::string,std::vector<float>>& map){
+        if(!wrapper.graphUpdateFunction(0).contains("x") && !wrapper.graphUpdateFunction(0).contains("y")){
+            LOG_TO_USER("Graph update function for " << wrapper.name << " did not contain 'x' and 'y' values");
+            return false;
+        }
+        graphWrapper.graphFunction = [=](std::map<std::string,std::vector<float>>& map){
 
             if(ImPlot::BeginPlot(wrapper.name.c_str())){
                 
@@ -152,11 +168,15 @@ bool PythonLayer::HandleGraphs(py::object obj, std::string varName, GuiTab& tab)
                 ImPlot::EndPlot();
             }
 
-        },graphWrapper.graphData);
+        };
         tab.graphingFunctions[wrapper.name] = std::move(graphWrapper);
         break;
     case GraphType::Lines:
-        graphWrapper.graphFunction = std::bind([=](std::map<std::string,std::vector<float>>& map){
+        if(!wrapper.graphUpdateFunction(0).contains("x") && !wrapper.graphUpdateFunction(0).contains("y")){
+            LOG_TO_USER("Graph update function for '" << wrapper.name << "' did not contain 'x' and 'y' values");
+            return false;
+        }
+        graphWrapper.graphFunction = [=](std::map<std::string,std::vector<float>>& map){
             if(ImPlot::BeginPlot(wrapper.name.c_str())){
                 
                 ImPlot::PlotLine(("##" + std::to_string(std::hash<std::string>()(wrapper.name))).c_str(),map["x"].data(),map["y"].data(),map["x"].size());
@@ -164,7 +184,7 @@ bool PythonLayer::HandleGraphs(py::object obj, std::string varName, GuiTab& tab)
                 ImPlot::EndPlot();
             }
 
-        },graphWrapper.graphData);
+        };
         tab.graphingFunctions[wrapper.name] = std::move(graphWrapper);
         break;
     }

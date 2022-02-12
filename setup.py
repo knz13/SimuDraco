@@ -7,5 +7,5 @@ from setuptools import setup,Extension
 setup(
     name="SimuDracoPython",
     version="0.0.1",
-    ext_modules=[Pybind11Extension("SimuDracoPython",["source/module.cpp"])]
+    ext_modules=[Pybind11Extension("SimuDracoPython",["source/module/module.cpp"])]
 )

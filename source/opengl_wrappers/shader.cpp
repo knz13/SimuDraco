@@ -82,7 +82,7 @@ bool Shader::CompileShader(unsigned int shaderID) {
             errorStr += character;
         }
 
-        LOG("Shader compilation error: " << errorStr);
+        LOG_TO_USER("Shader compilation error: " << errorStr);
 
         GL_CALL(glDeleteShader(shaderID));
 

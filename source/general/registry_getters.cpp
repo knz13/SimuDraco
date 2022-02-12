@@ -29,3 +29,7 @@ Window& RegistryGetters::SubWindow(std::string windowName) {
 std::unordered_map<std::string,std::unique_ptr<Window>>& RegistryGetters::SubWindows() {
     return Registry::m_SubWindows;
 }
+
+float RegistryGetters::DeltaTime() {
+    return Registry::m_DeltaTime;
+}

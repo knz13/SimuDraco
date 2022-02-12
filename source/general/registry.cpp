@@ -5,7 +5,7 @@
 #include "window/window.h"
 #include <future>
 
-
+float Registry::m_DeltaTime = 0;
 std::unique_ptr<Window> Registry::m_MainWindow;
 std::unordered_map<std::string,std::unique_ptr<Window>> Registry::m_SubWindows;
 
@@ -26,6 +26,10 @@ RegistryCreates Registry::Create() {
     return RegistryCreates();
 }
 void Registry::MainLoop() {
+
+    static double currentTime = 0;
+    static double oldTime = 0;
+
     if(!m_MainWindow){
         DEBUG_ERROR("Calling main window function without any window defined!");
         return;
@@ -39,6 +43,11 @@ void Registry::MainLoop() {
 
     
     while(m_MainWindow.get()->IsOpen()){
+
+        currentTime = glfwGetTime();
+        m_DeltaTime = static_cast<float>(currentTime - oldTime);
+
+        oldTime = currentTime;
 
 
         glfwMakeContextCurrent(m_MainWindow.get()->m_ContextPointer);

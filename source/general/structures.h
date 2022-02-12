@@ -50,13 +50,17 @@ namespace GraphType {
 };
 
 struct PythonGraphWrapper {
-    std::string name = "";
-    GraphType::PythonGraphTypes graphType = GraphType::Bars;
-    std::function<std::map<std::string,float>(py::object,float)> graphUpdateFunction = [](py::object obj,float deltaTime){return std::map<std::string,float>();};
+    PythonGraphWrapper(): name(""),graphType(GraphType::Bars){
+        graphUpdateFunction = [](float deltaTime){return py::dict();};
+    }
+
+    std::string name;
+    GraphType::PythonGraphTypes graphType;
+    std::function<py::dict(float)> graphUpdateFunction;
 };
 
 struct GuiGraphWrapper {
-    std::function<void()> graphFunction = [](){};
+    std::function<void(std::map<std::string,std::vector<float>>&)> graphFunction = [](std::map<std::string,std::vector<float>>& map){};
     std::map<std::string,std::vector<float>> graphData;
     PythonGraphWrapper wrapper;
 };

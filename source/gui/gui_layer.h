@@ -14,6 +14,7 @@ public:
 private:
     static void CreateGraphPanel(Window& win);
     static void UpdateGraphs();
+    
     static void CreatePropertiesPanel(Window& win);
     
     static std::string m_CurrentTab;
