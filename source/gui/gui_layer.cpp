@@ -1,5 +1,6 @@
 #include "gui_layer.h"
 #include "../kv.h"
+#include "imgui/imgui.h"
 
 ImGuiIO* GuiLayer::m_IO = nullptr;
 NFD::Guard GuiLayer::m_FileDialogHandle;
@@ -24,7 +25,9 @@ bool GuiLayer::Init(Window& win) {
     ImGui::StyleColorsDark();
 
     win.PreDrawingLoop().Connect([&](Window& window){
-        UpdateGraphs();
+        if(!Registry::Get().SimulationProperties().paused){
+            UpdateGraphs();
+        }
         
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -68,6 +71,9 @@ void GuiLayer::CreateGraphPanel(Window& win) {
 
 
 void GuiLayer::CreatePropertiesPanel(Window& win) {
+    static float pausedSimulationTime = 0;
+
+
     ImGui::Begin("Properties",NULL,ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_MenuBar);
     ImGui::SetWindowSize(ImVec2(2*win.Properties().width/6,win.Properties().height));
     ImGui::SetWindowPos(ImVec2(4*win.Properties().width/6,0));
@@ -89,7 +95,33 @@ void GuiLayer::CreatePropertiesPanel(Window& win) {
         ImGui::EndMenuBar();
     }
 
+    if(Registry::m_SimulationProperties.paused){
+        if(ImGui::Button("Play")){
+            Registry::m_SimulationProperties.paused = false;
+            HandleGraphTimeSkip();  
+        }
+    }
+    else {
+        if(ImGui::Button("Pause")){
+            pausedSimulationTime = Registry::m_SimulationProperties.currentTime;
+            Registry::m_SimulationProperties.paused = true;
+        }
+    }
+    
 
+
+    ImGui::BulletText("Current Simulation Time");
+    if(!Registry::m_SimulationProperties.paused){
+        ImGui::BulletText(std::to_string(Registry::m_SimulationProperties.currentTime).c_str());
+    }
+    else {
+        ImGui::SliderFloat("##CurrentSimulationTime",&Registry::m_SimulationProperties.currentTime,0,pausedSimulationTime);
+        
+    }
+
+    if(m_Tabs[m_CurrentTab].propertiesFunctions.size() > 0){
+        ImGui::BulletText("Script Variables:");
+    }
     for(auto& func : m_Tabs[m_CurrentTab].propertiesFunctions){
         func.second(m_Tabs[m_CurrentTab].objectReference);
     }
@@ -123,7 +155,7 @@ void GuiLayer::UpdateGraphs() {
     
     for(auto& graphWrapper : m_Tabs[m_CurrentTab].graphingFunctions){
         py::object dictWithGraphData;
-        PY_CALL(dictWithGraphData = graphWrapper.second.wrapper.graphUpdateFunction(Registry::Get().DeltaTime()));
+        PY_CALL(dictWithGraphData = graphWrapper.second.wrapper.graphUpdateFunction(Registry::Get().DeltaTime(),Registry::Get().SimulationProperties().currentTime));
 
         std::map<std::string,float> mapWithData;
         if(!PY_ASSERT((mapWithData = dictWithGraphData.cast<std::map<std::string,float>>()))){
@@ -131,9 +163,45 @@ void GuiLayer::UpdateGraphs() {
             continue;
         }
 
+        graphWrapper.second.graphUpdateTimeLog.push_back(std::make_pair<>(Registry::m_SimulationProperties.currentTime,mapWithData));
         for(auto& value : mapWithData){
             graphWrapper.second.graphData[value.first].push_back(value.second);
         }
 
+    }
+}
+
+void GuiLayer::HandleGraphTimeSkip() {
+    for(auto& graphWrapper : m_Tabs[m_CurrentTab].graphingFunctions){
+        if(Registry::m_SimulationProperties.currentTime == 0){
+            graphWrapper.second.graphData.clear();
+            graphWrapper.second.graphUpdateTimeLog.clear();
+        }
+
+
+        auto it = graphWrapper.second.graphUpdateTimeLog.begin();
+
+        while(it != graphWrapper.second.graphUpdateTimeLog.end()){
+            if(it->first > Registry::m_SimulationProperties.currentTime){
+                break;
+            }
+            it++;
+        }
+        if(it != graphWrapper.second.graphUpdateTimeLog.begin()){
+            graphWrapper.second.graphUpdateTimeLog.erase(it,graphWrapper.second.graphUpdateTimeLog.end());
+        }
+
+        for(auto& vec : graphWrapper.second.graphData){
+            size_t vecSize = vec.second.size();
+            vec.second.clear();
+            vec.second.reserve(graphWrapper.second.graphUpdateTimeLog.size());
+        }
+        
+        
+        for(auto& dict : graphWrapper.second.graphUpdateTimeLog){
+            for(auto& dict_val : dict.second){
+                graphWrapper.second.graphData[dict_val.first].push_back(dict_val.second);
+            }
+        }
     }
 }

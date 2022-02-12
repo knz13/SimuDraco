@@ -23,10 +23,12 @@ public:
     static bool IsFutureDone(std::future<T>& fut);
 
 private:
+    static SimulationPropertiesStorage m_SimulationProperties;
     static float m_DeltaTime;
     static std::unique_ptr<Window> m_MainWindow;
     static std::unordered_map<std::string,std::unique_ptr<Window>> m_SubWindows;
     
+    friend class GuiLayer;
     friend class RegistryCreates;
     friend class RegistryGetters;
     friend class RegistrySetters;

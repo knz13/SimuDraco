@@ -155,12 +155,11 @@ bool PythonLayer::HandleGraphs(py::object obj, std::string varName, GuiTab& tab)
     graphWrapper.wrapper = wrapper;
     switch(wrapper.graphType){
     case GraphType::Bars:
-        if(!wrapper.graphUpdateFunction(0).contains("x") && !wrapper.graphUpdateFunction(0).contains("y")){
+        if(!wrapper.graphUpdateFunction(0,0).contains("x") && !wrapper.graphUpdateFunction(0,0).contains("y")){
             LOG_TO_USER("Graph update function for " << wrapper.name << " did not contain 'x' and 'y' values");
             return false;
         }
         graphWrapper.graphFunction = [=](std::map<std::string,std::vector<float>>& map){
-
             if(ImPlot::BeginPlot(wrapper.name.c_str())){
                 
                 ImPlot::PlotBars(("##" + std::to_string(std::hash<std::string>()(wrapper.name))).c_str(),map["x"].data(),map["y"].data(),map["x"].size(),2);
@@ -172,11 +171,12 @@ bool PythonLayer::HandleGraphs(py::object obj, std::string varName, GuiTab& tab)
         tab.graphingFunctions[wrapper.name] = std::move(graphWrapper);
         break;
     case GraphType::Lines:
-        if(!wrapper.graphUpdateFunction(0).contains("x") && !wrapper.graphUpdateFunction(0).contains("y")){
+        if(!wrapper.graphUpdateFunction(0,0).contains("x") && !wrapper.graphUpdateFunction(0,0).contains("y")){
             LOG_TO_USER("Graph update function for '" << wrapper.name << "' did not contain 'x' and 'y' values");
             return false;
         }
         graphWrapper.graphFunction = [=](std::map<std::string,std::vector<float>>& map){
+            
             if(ImPlot::BeginPlot(wrapper.name.c_str())){
                 
                 ImPlot::PlotLine(("##" + std::to_string(std::hash<std::string>()(wrapper.name))).c_str(),map["x"].data(),map["y"].data(),map["x"].size());

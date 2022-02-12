@@ -14,6 +14,8 @@ private:
     static bool HandleProperties(py::object obj, std::string varName,std::string varType,GuiTab& tab);
     static bool HandleGraphs(py::object obj, std::string varName,GuiTab& tab);
 
+
+
     static py::scoped_interpreter m_Interpreter;
     static py::module m_Module;
 

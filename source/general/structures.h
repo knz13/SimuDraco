@@ -49,19 +49,27 @@ namespace GraphType {
     };
 };
 
+
+struct SimulationPropertiesStorage {
+    bool paused = true;
+    float currentTime = 0;
+
+};
+
 struct PythonGraphWrapper {
     PythonGraphWrapper(): name(""),graphType(GraphType::Bars){
-        graphUpdateFunction = [](float deltaTime){return py::dict();};
+        graphUpdateFunction = [](float deltaTime,float currentSimulationTime){return py::dict();};
     }
 
     std::string name;
     GraphType::PythonGraphTypes graphType;
-    std::function<py::dict(float)> graphUpdateFunction;
+    std::function<py::dict(float,float)> graphUpdateFunction;
 };
 
 struct GuiGraphWrapper {
     std::function<void(std::map<std::string,std::vector<float>>&)> graphFunction = [](std::map<std::string,std::vector<float>>& map){};
     std::map<std::string,std::vector<float>> graphData;
+    std::vector<std::pair<float,std::map<std::string,float>>> graphUpdateTimeLog;
     PythonGraphWrapper wrapper;
 };
 
@@ -73,6 +81,7 @@ struct GuiTab {
 
     std::string name= "";
     py::object objectReference;
+    
     std::unordered_map<std::string,GuiGraphWrapper> graphingFunctions;
     std::unordered_map<std::string,std::function<void(py::object)>> propertiesFunctions;
 

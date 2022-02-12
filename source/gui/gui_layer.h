@@ -14,9 +14,14 @@ public:
 private:
     static void CreateGraphPanel(Window& win);
     static void UpdateGraphs();
-    
+    static void HandleGraphTimeSkip();
+
+
     static void CreatePropertiesPanel(Window& win);
     
+    
+
+
     static std::string m_CurrentTab;
     static ImGuiIO* m_IO;
     static NFD::Guard m_FileDialogHandle;

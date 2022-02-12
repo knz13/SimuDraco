@@ -6,6 +6,7 @@
 #include <future>
 
 float Registry::m_DeltaTime = 0;
+SimulationPropertiesStorage Registry::m_SimulationProperties;
 std::unique_ptr<Window> Registry::m_MainWindow;
 std::unordered_map<std::string,std::unique_ptr<Window>> Registry::m_SubWindows;
 
@@ -40,8 +41,7 @@ void Registry::MainLoop() {
             glfwSetWindowShouldClose(window.second.get()->GetContextPointer(),GL_TRUE);
         }
     });
-
-    
+   
     while(m_MainWindow.get()->IsOpen()){
 
         currentTime = glfwGetTime();
@@ -49,7 +49,11 @@ void Registry::MainLoop() {
 
         oldTime = currentTime;
 
-
+        if(!m_SimulationProperties.paused){
+            m_SimulationProperties.currentTime += m_DeltaTime;
+        }
+        
+        
         glfwMakeContextCurrent(m_MainWindow.get()->m_ContextPointer);
         m_MainWindow.get()->BeginDrawState();
         

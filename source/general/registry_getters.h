@@ -9,7 +9,8 @@ public:
     Window& SubWindow(std::string windowName);
     std::unordered_map<std::string,std::unique_ptr<Window>>& SubWindows();
     float DeltaTime();
-
+    const SimulationPropertiesStorage& SimulationProperties();
+    
 
 
 };

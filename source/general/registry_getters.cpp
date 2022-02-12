@@ -33,3 +33,10 @@ std::unordered_map<std::string,std::unique_ptr<Window>>& RegistryGetters::SubWin
 float RegistryGetters::DeltaTime() {
     return Registry::m_DeltaTime;
 }
+
+
+
+const SimulationPropertiesStorage& RegistryGetters::SimulationProperties() {
+    return Registry::m_SimulationProperties;
+}
+

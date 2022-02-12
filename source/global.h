@@ -23,6 +23,7 @@
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_glfw.h"
 #include "implot.h"
+#include "implot_internal.h"
 #include "misc/cpp/imgui_stdlib.h"
 #include "thread_pool.hpp"
 #include "nfd.hpp"
