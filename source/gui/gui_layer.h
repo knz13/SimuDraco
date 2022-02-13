@@ -10,6 +10,7 @@ public:
     static GuiTab& CreateTab(std::string name);
     static bool DeleteTab(std::string name);
     static void SetCurrentTab(std::string tabName);
+    static const GuiTab& GetCurrentTab();
 
 private:
     static void CreateGraphPanel(Window& win);

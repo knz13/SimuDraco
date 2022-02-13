@@ -19,7 +19,8 @@ PYBIND11_EMBEDDED_MODULE(SimuDracoPython,m){
 
 };
 
-
+std::map<std::string,std::string> PythonLayer::m_LoadedFilePerTab;
+std::map<std::string,std::vector<std::string>> PythonLayer::m_LoadedTabsPerFile;
 py::scoped_interpreter PythonLayer::m_Interpreter;
 py::module PythonLayer::m_Module;
 void PythonLayer::Init() {
@@ -58,7 +59,7 @@ bool PythonLayer::PythonLayer::LoadPythonFile(std::string filepath) {
 
     py::object type = py::eval("type");
     
-
+    std::vector<std::string> loadedTabs;
     
     for(auto& item : locals){
         if(py::type::of(item.second).equal(py::type::of(py::globals()["__builtins__"]))){
@@ -82,6 +83,7 @@ bool PythonLayer::PythonLayer::LoadPythonFile(std::string filepath) {
             
             
             GuiTab& tab = GuiLayer::CreateTab(py::str(item.first).cast<std::string>());
+            loadedTabs.push_back(tab.name);
             tab.objectReference = obj;
             
 
@@ -95,9 +97,12 @@ bool PythonLayer::PythonLayer::LoadPythonFile(std::string filepath) {
                 }
             }
             GuiLayer::SetCurrentTab(tab.name);
+            m_LoadedFilePerTab[tab.name] = filepath;
        }
     }
 
+
+    m_LoadedTabsPerFile[filepath] = std::move(loadedTabs);
     return true;
 }
 
@@ -155,14 +160,15 @@ bool PythonLayer::HandleGraphs(py::object obj, std::string varName, GuiTab& tab)
     graphWrapper.wrapper = wrapper;
     switch(wrapper.graphType){
     case GraphType::Bars:
-        if(!wrapper.graphUpdateFunction(0,0).contains("x") && !wrapper.graphUpdateFunction(0,0).contains("y")){
+        if(!wrapper.graphUpdateFunction(1,1).contains("x") && !wrapper.graphUpdateFunction(1,1).contains("y")){
             LOG_TO_USER("Graph update function for " << wrapper.name << " did not contain 'x' and 'y' values");
             return false;
-        }
+        };
         graphWrapper.graphFunction = [=](std::map<std::string,std::vector<float>>& map){
+            ImPlotAxisFlags flags = ImPlotAxisFlags_RangeFit | ImPlotAxisFlags_AutoFit;
             if(ImPlot::BeginPlot(wrapper.name.c_str())){
-                
-                ImPlot::PlotBars(("##" + std::to_string(std::hash<std::string>()(wrapper.name))).c_str(),map["x"].data(),map["y"].data(),map["x"].size(),2);
+                ImPlot::SetupAxes("X", "Y", flags, 0);
+                ImPlot::PlotBars(("##" + std::to_string(std::hash<std::string>()(wrapper.name))).c_str(),map["x"].data(),map["y"].data(),map["x"].size(),0.05f);
 
                 ImPlot::EndPlot();
             }
@@ -171,14 +177,15 @@ bool PythonLayer::HandleGraphs(py::object obj, std::string varName, GuiTab& tab)
         tab.graphingFunctions[wrapper.name] = std::move(graphWrapper);
         break;
     case GraphType::Lines:
-        if(!wrapper.graphUpdateFunction(0,0).contains("x") && !wrapper.graphUpdateFunction(0,0).contains("y")){
+        
+        if(!wrapper.graphUpdateFunction(1,1).contains("x") && !wrapper.graphUpdateFunction(1,1).contains("y")){
             LOG_TO_USER("Graph update function for '" << wrapper.name << "' did not contain 'x' and 'y' values");
             return false;
-        }
+        };
         graphWrapper.graphFunction = [=](std::map<std::string,std::vector<float>>& map){
-            
+            ImPlotAxisFlags flags = ImPlotAxisFlags_RangeFit | ImPlotAxisFlags_AutoFit;
             if(ImPlot::BeginPlot(wrapper.name.c_str())){
-                
+                ImPlot::SetupAxes("X", "Y", flags,0);
                 ImPlot::PlotLine(("##" + std::to_string(std::hash<std::string>()(wrapper.name))).c_str(),map["x"].data(),map["y"].data(),map["x"].size());
 
                 ImPlot::EndPlot();
@@ -193,4 +200,54 @@ bool PythonLayer::HandleGraphs(py::object obj, std::string varName, GuiTab& tab)
 
 void PythonLayer::Cleanup() {
     
+}
+
+void PythonLayer::ReloadCurrentPythonFile() {
+    const GuiTab& currentTab = GuiLayer::GetCurrentTab();
+
+    if (currentTab.name == "None") {
+        return;
+    }
+
+    std::string fileName = m_LoadedFilePerTab[currentTab.name];
+    m_LoadedFilePerTab.erase(currentTab.name);
+
+    for (auto& tabName : m_LoadedTabsPerFile[fileName]) {
+        GuiLayer::DeleteTab(tabName);
+    }
+
+    m_LoadedTabsPerFile.erase(fileName);
+
+    if (m_LoadedTabsPerFile.size() != 0) {
+        GuiLayer::SetCurrentTab(m_LoadedFilePerTab.begin()->first);
+    }
+    else {
+        GuiLayer::SetCurrentTab("None");
+    }
+    LoadPythonFile(fileName);
+
+}
+
+void PythonLayer::DeleteCurrentTab() {
+    const GuiTab& currentTab = GuiLayer::GetCurrentTab();
+
+    if (currentTab.name == "None") {
+        return;
+    }
+
+    std::string fileName = m_LoadedFilePerTab[currentTab.name];
+    m_LoadedFilePerTab.erase(currentTab.name);
+
+    for (auto& tabName : m_LoadedTabsPerFile[fileName]) {
+        GuiLayer::DeleteTab(tabName);
+    }
+
+    m_LoadedTabsPerFile.erase(fileName);
+
+    if (m_LoadedTabsPerFile.size() != 0) {
+        GuiLayer::SetCurrentTab(m_LoadedFilePerTab.begin()->first);
+    }
+    else {
+        GuiLayer::SetCurrentTab("None");
+    }
 }

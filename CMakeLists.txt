@@ -215,6 +215,7 @@ add_executable(${PROJECT_NAME}
 	${PROJECT_SOURCE_DIR}/source/gui/gui_layer.cpp
 	${PROJECT_SOURCE_DIR}/source/python_layer/python_layer.cpp
 	${PROJECT_SOURCE_DIR}/source/general/structures.cpp
+	${PROJECT_SOURCE_DIR}/source/general/registry_setters.cpp
 )
         
 #setting c/cpp standard

@@ -5,7 +5,7 @@
 class RegistrySetters {
 public:
     
-
+    void SimulationPauseState(bool state);
 
 
 };

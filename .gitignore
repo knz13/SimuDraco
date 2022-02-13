@@ -1,4 +1,6 @@
 /build*
+/out*
+.vs
 /vendor
 .vscode
 /SimuDracoPython.egg-info

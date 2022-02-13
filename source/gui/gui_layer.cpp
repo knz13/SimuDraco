@@ -12,7 +12,9 @@ bool GuiLayer::Init(Window& win) {
         return true;
     }
     
-    
+    glfwSetWindowSizeCallback(Registry::Get().MainWindow().GetContextPointer(),[](GLFWwindow* win,int width,int height){
+        Registry::Set().SimulationPauseState(true);
+    });
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -108,6 +110,11 @@ void GuiLayer::CreatePropertiesPanel(Window& win) {
         }
     }
     
+    if (m_CurrentTab != "None") {
+        if (ImGui::Button("Reload Python File")) {
+            PythonLayer::ReloadCurrentPythonFile();
+        }
+    }
 
 
     ImGui::BulletText("Current Simulation Time");
@@ -155,7 +162,10 @@ void GuiLayer::UpdateGraphs() {
     
     for(auto& graphWrapper : m_Tabs[m_CurrentTab].graphingFunctions){
         py::object dictWithGraphData;
-        PY_CALL(dictWithGraphData = graphWrapper.second.wrapper.graphUpdateFunction(Registry::Get().DeltaTime(),Registry::Get().SimulationProperties().currentTime));
+        if(!PY_ASSERT(dictWithGraphData = graphWrapper.second.wrapper.graphUpdateFunction(Registry::Get().DeltaTime(),Registry::Get().SimulationProperties().currentTime))){
+            PythonLayer::DeleteCurrentTab();
+            break;
+        }
 
         std::map<std::string,float> mapWithData;
         if(!PY_ASSERT((mapWithData = dictWithGraphData.cast<std::map<std::string,float>>()))){
@@ -204,4 +214,8 @@ void GuiLayer::HandleGraphTimeSkip() {
             }
         }
     }
+}
+
+const GuiTab& GuiLayer::GetCurrentTab() {
+    return m_Tabs[m_CurrentTab];
 }

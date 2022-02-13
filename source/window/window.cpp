@@ -81,6 +81,7 @@ void Window::EndDrawState() {
 
 void Window::BeginDrawState() {
     glfwPollEvents();
+    glfwGetWindowSize(m_ContextPointer, &m_Properties.width, &m_Properties.height);
 
     glm::vec3 color = m_ClearColor.Normalized();
     GL_CALL(glClearColor(color.x,color.y,color.z,1.0f));

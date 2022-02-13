@@ -92,7 +92,7 @@ static bool GetGLError(int line,std::string file){
 
 
 
-#define PY_CALL(x) try { x; } catch(py::error_already_set &e){std::cout << e.what() << std::endl;}
+#define PY_CALL(x) try { x; } catch(py::error_already_set &e){DEBUG_LOG(e.what());}
 #define PY_ASSERT(x) [&](){try { x; return true; } catch(py::error_already_set &e){DEBUG_LOG(e.what()); return false;}}()
 
 
