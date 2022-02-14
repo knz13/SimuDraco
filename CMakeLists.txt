@@ -49,29 +49,11 @@ if(NOT ${glfw_exists})
     GIT_REPOSITORY https://github.com/glfw/glfw
     GIT_TAG 3.3.6
     CMAKE_ARGS  -DCMAKE_INSTALL_PREFIX:PATH=${PROJECT_SOURCE_DIR}/vendor/glfw
+                -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     BUILD_BYPRODUCTS ${PROJECT_SOURCE_DIR}/vendor/glfw/lib/${CMAKE_STATIC_LIBRARY_PREFIX}glfw3${CMAKE_STATIC_LIBRARY_SUFFIX}
     )
 
     list(APPEND DEPS_TO_BUILD GLFW)
-
-endif()
-
-
-                    
-
-# repository download for glew...
-                    
-dir_exists(glew_exists ${PROJECT_SOURCE_DIR}/vendor/glew)
-
-if(NOT ${glew_exists})
-    ExternalProject_Add(GLEW
-    GIT_REPOSITORY https://github.com/Perlmint/glew-cmake
-    GIT_TAG glew-cmake-2.2.0
-    CMAKE_ARGS  -DCMAKE_INSTALL_PREFIX:PATH=${PROJECT_SOURCE_DIR}/vendor/glew
-    BUILD_BYPRODUCTS ${PROJECT_SOURCE_DIR}/vendor/glew/lib/${CMAKE_STATIC_LIBRARY_PREFIX}glew$<$<CONFIG:Debug>:d>${CMAKE_STATIC_LIBRARY_SUFFIX}
-    )
-
-    list(APPEND DEPS_TO_BUILD GLEW)
 
 endif()
 
@@ -172,10 +154,31 @@ if(NOT ${nfd_exists})
     GIT_REPOSITORY https://github.com/btzy/nativefiledialog-extended
     GIT_TAG origin/master
     CMAKE_ARGS  -DCMAKE_INSTALL_PREFIX:PATH=${PROJECT_SOURCE_DIR}/vendor/nfd
+                -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     BUILD_BYPRODUCTS ${PROJECT_SOURCE_DIR}/vendor/nfd/lib/${CMAKE_STATIC_LIBRARY_PREFIX}nfd${CMAKE_STATIC_LIBRARY_SUFFIX}
     )
 
     list(APPEND DEPS_TO_BUILD NFD)
+
+endif()
+
+
+                    
+
+# repository download for glew...
+                    
+dir_exists(glew_exists ${PROJECT_SOURCE_DIR}/vendor/glew)
+
+if(NOT ${glew_exists})
+    ExternalProject_Add(GLEW
+    GIT_REPOSITORY https://github.com/Perlmint/glew-cmake
+    GIT_TAG glew-cmake-2.2.0
+    CMAKE_ARGS  -DCMAKE_INSTALL_PREFIX:PATH=${PROJECT_SOURCE_DIR}/vendor/glew
+                -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+    BUILD_BYPRODUCTS ${PROJECT_SOURCE_DIR}/vendor/glew/lib/${CMAKE_STATIC_LIBRARY_PREFIX}glewd${CMAKE_STATIC_LIBRARY_SUFFIX}
+    )
+
+    list(APPEND DEPS_TO_BUILD GLEW)
 
 endif()
 
@@ -242,16 +245,16 @@ endforeach()
     target_link_libraries(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/vendor/glfw/lib/${CMAKE_STATIC_LIBRARY_PREFIX}glfw3${CMAKE_STATIC_LIBRARY_SUFFIX})
                 
 
-    #linking for glew...
-
-
-    target_link_libraries(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/vendor/glew/lib/${CMAKE_STATIC_LIBRARY_PREFIX}glew$<$<CONFIG:Debug>:d>${CMAKE_STATIC_LIBRARY_SUFFIX})
-                
-
     #linking for nfd...
 
 
     target_link_libraries(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/vendor/nfd/lib/${CMAKE_STATIC_LIBRARY_PREFIX}nfd${CMAKE_STATIC_LIBRARY_SUFFIX})
+                
+
+    #linking for glew...
+
+
+    target_link_libraries(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/vendor/glew/lib/${CMAKE_STATIC_LIBRARY_PREFIX}glewd${CMAKE_STATIC_LIBRARY_SUFFIX})
                 
 
     #linking for OpenGL...
@@ -272,9 +275,6 @@ endforeach()
     target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/vendor/glfw/include)
     
 
-    target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/vendor/glew/include)
-    
-
     target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/vendor/glm)
     
 
@@ -291,6 +291,9 @@ endforeach()
     
 
     target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/vendor/nfd/include)
+    
+
+    target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/vendor/glew/include)
     
 
     target_include_directories(${PROJECT_NAME} PUBLIC ${Python_INCLUDE_DIRS})

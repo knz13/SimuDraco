@@ -6,6 +6,8 @@ ImGuiIO* GuiLayer::m_IO = nullptr;
 NFD::Guard GuiLayer::m_FileDialogHandle;
 std::unordered_map<std::string,GuiTab> GuiLayer::m_Tabs = {{"None",GuiTab()}};
 std::string GuiLayer::m_CurrentTab = "None";
+std::vector<std::string> GuiLayer::m_ErrorMsgs;
+unsigned int GuiLayer::m_NumberOfErrors = 0;
 
 bool GuiLayer::Init(Window& win) {
     if(m_IO != nullptr){
@@ -35,10 +37,10 @@ bool GuiLayer::Init(Window& win) {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-
+        
         CreateGraphPanel(win);
         CreatePropertiesPanel(win);
-
+        CreateErrorMsgPanel(win);
     });
 
     win.PostDrawingLoop().Connect([&](Window& window){
@@ -84,6 +86,7 @@ void GuiLayer::CreatePropertiesPanel(Window& win) {
         if(ImGui::BeginMenu("Menu")){
             
             if(ImGui::MenuItem("Add Python File")){
+                m_NumberOfErrors = 0;
                 NFD::UniquePath outPath;
                 nfdfilteritem_t filter[] = {{"Python File","py"}};
                 nfdresult_t result = NFD::OpenDialog(outPath,filter,1,std::filesystem::current_path().string().c_str());
@@ -99,6 +102,7 @@ void GuiLayer::CreatePropertiesPanel(Window& win) {
 
     if(Registry::m_SimulationProperties.paused){
         if(ImGui::Button("Play")){
+            m_NumberOfErrors = 0;
             Registry::m_SimulationProperties.paused = false;
             HandleGraphTimeSkip();  
         }
@@ -162,14 +166,20 @@ void GuiLayer::UpdateGraphs() {
     
     for(auto& graphWrapper : m_Tabs[m_CurrentTab].graphingFunctions){
         py::object dictWithGraphData;
-        if(!PY_ASSERT(dictWithGraphData = graphWrapper.second.wrapper.graphUpdateFunction(Registry::Get().DeltaTime(),Registry::Get().SimulationProperties().currentTime))){
+        std::string errorMsg;
+        if(!PY_ASSERT(dictWithGraphData = graphWrapper.second.wrapper.graphUpdateFunction(Registry::Get().DeltaTime(),Registry::Get().SimulationProperties().currentTime),&errorMsg)){
             PythonLayer::DeleteCurrentTab();
+            GuiLayer::AddErrorMsg(errorMsg);
+            Registry::m_SimulationProperties.currentTime = 0;
+            Registry::m_SimulationProperties.paused = true;
             break;
         }
 
         std::map<std::string,float> mapWithData;
-        if(!PY_ASSERT((mapWithData = dictWithGraphData.cast<std::map<std::string,float>>()))){
-            LOG_TO_USER("Result of function from graph: " << graphWrapper.first << " was not equal to a dict with string keys and float values");
+        if(!PY_TRY_CAST((mapWithData = dictWithGraphData.cast<std::map<std::string,float>>()))){
+            stringstream ss;
+            ss << "Result of function from graph: " << graphWrapper.first << " was not equal to a dict with string keys and float values";
+            GuiLayer::AddErrorMsg(ss.str());
             continue;
         }
 
@@ -218,4 +228,39 @@ void GuiLayer::HandleGraphTimeSkip() {
 
 const GuiTab& GuiLayer::GetCurrentTab() {
     return m_Tabs[m_CurrentTab];
+}
+
+void GuiLayer::AddErrorMsg(std::string msg) {
+    m_ErrorMsgs.push_back(msg);
+    m_NumberOfErrors++;
+}
+
+void GuiLayer::CreateErrorMsgPanel(Window& win) {
+    std::string windowName;
+
+    if (m_NumberOfErrors > 0) {
+        windowName = "Error Panel: " + to_string(m_NumberOfErrors) + " New Errors!";
+    }
+    else {
+        windowName = "Error Panel: No Errors";
+    }
+
+    ImGui::Begin(windowName.c_str(),NULL,ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
+    ImGui::SetWindowCollapsed(true,ImGuiCond_Once);
+    ImGui::SetWindowSize(ImVec2(4*win.Properties().width/6,win.Properties().height/2));
+
+    if (ImGui::IsWindowCollapsed()) {
+        ImGui::SetWindowPos(ImVec2(0, win.Properties().height));
+    }
+    else {
+        ImGui::SetWindowPos(ImVec2(0, win.Properties().height / 2));
+    }
+    
+
+    for (auto& text : m_ErrorMsgs) {
+        ImGui::BulletText(("ERROR: " + text).c_str());
+    }
+
+
+    ImGui::End();
 }

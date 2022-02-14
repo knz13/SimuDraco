@@ -93,8 +93,8 @@ static bool GetGLError(int line,std::string file){
 
 
 #define PY_CALL(x) try { x; } catch(py::error_already_set &e){DEBUG_LOG(e.what());}
-#define PY_ASSERT(x) [&](){try { x; return true; } catch(py::error_already_set &e){DEBUG_LOG(e.what()); return false;}}()
-
+#define PY_ASSERT(x,...) [&](std::string* str=nullptr){try { x; return true; } catch(py::error_already_set &e){if(str){*str = e.what();}; return false;}}(__VA_ARGS__)
+#define PY_TRY_CAST(x,...)  [&](std::string* str=nullptr){try { x; return true; } catch(py::cast_error &e){if(str){*str = e.what();}; return false;}}(__VA_ARGS__)
 
 
 
