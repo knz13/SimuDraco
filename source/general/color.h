@@ -11,7 +11,7 @@ public:
 
     /**
      * 
-     * @return the color as floats from 0 to 1
+     * @return the color as doubles from 0 to 1
      */
     glm::vec3 Normalized();
     /**
@@ -23,7 +23,7 @@ public:
     /**
      * Sets the color from rgb values normalized
      */
-    void Set(float r,float g,float b);
+    void Set(double r,double g,double b);
     /**
      * Sets the color from rgb values from 0 to 255
      */

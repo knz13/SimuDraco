@@ -5,7 +5,7 @@
 #include "window/window.h"
 #include <future>
 
-float Registry::m_DeltaTime = 0;
+double Registry::m_DeltaTime = 0;
 SimulationPropertiesStorage Registry::m_SimulationProperties;
 std::unique_ptr<Window> Registry::m_MainWindow;
 std::unordered_map<std::string,std::unique_ptr<Window>> Registry::m_SubWindows;
@@ -45,7 +45,7 @@ void Registry::MainLoop() {
     while(m_MainWindow.get()->IsOpen()){
 
         currentTime = glfwGetTime();
-        m_DeltaTime = static_cast<float>(currentTime - oldTime);
+        m_DeltaTime = static_cast<double>(currentTime - oldTime);
 
         oldTime = currentTime;
 

@@ -23,7 +23,7 @@ void Color::Set(unsigned char r, unsigned char g, unsigned char b) {
     m_ColorValue.z = b;
 }
 
-void Color::Set(float r, float g, float b) {
+void Color::Set(double r, double g, double b) {
     m_ColorValue.x = r*255;
     m_ColorValue.y = g*255;
     m_ColorValue.z = b*255;

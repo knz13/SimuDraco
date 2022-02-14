@@ -136,8 +136,8 @@ bool PythonLayer::HandleProperties(py::object obj, std::string varName,std::stri
     }
     else if(varType == "float"){
         tab.propertiesFunctions[varName] = [=](py::object thisObj){
-            float var = thisObj.attr(py::str(varName)).cast<float>();
-            ImGui::InputFloat(showName.c_str(),&var);
+            double var = thisObj.attr(py::str(varName)).cast<double>();
+            ImGui::InputDouble(showName.c_str(),&var);
             thisObj.attr(py::str(varName)) = var;
         };
         return true;
@@ -164,7 +164,7 @@ bool PythonLayer::HandleGraphs(py::object obj, std::string varName, GuiTab& tab)
             LOG_TO_USER("Graph update function for " << wrapper.name << " did not contain 'x' and 'y' values");
             return false;
         };
-        graphWrapper.graphFunction = [=](std::map<std::string,std::vector<float>>& map){
+        graphWrapper.graphFunction = [=](std::map<std::string,std::vector<double>>& map){
             ImPlotAxisFlags flags = ImPlotAxisFlags_RangeFit | ImPlotAxisFlags_AutoFit;
             if(ImPlot::BeginPlot(wrapper.name.c_str())){
                 ImPlot::SetupAxes("X", "Y", flags, 0);
@@ -182,7 +182,7 @@ bool PythonLayer::HandleGraphs(py::object obj, std::string varName, GuiTab& tab)
             LOG_TO_USER("Graph update function for '" << wrapper.name << "' did not contain 'x' and 'y' values");
             return false;
         };
-        graphWrapper.graphFunction = [=](std::map<std::string,std::vector<float>>& map){
+        graphWrapper.graphFunction = [=](std::map<std::string,std::vector<double>>& map){
             ImPlotAxisFlags flags = ImPlotAxisFlags_RangeFit | ImPlotAxisFlags_AutoFit;
             if(ImPlot::BeginPlot(wrapper.name.c_str())){
                 ImPlot::SetupAxes("X", "Y", flags,0);

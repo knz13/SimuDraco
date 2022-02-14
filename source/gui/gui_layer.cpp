@@ -75,7 +75,7 @@ void GuiLayer::CreateGraphPanel(Window& win) {
 
 
 void GuiLayer::CreatePropertiesPanel(Window& win) {
-    static float pausedSimulationTime = 0;
+    static double pausedSimulationTime = 0;
 
 
     ImGui::Begin("Properties",NULL,ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_MenuBar);
@@ -126,8 +126,9 @@ void GuiLayer::CreatePropertiesPanel(Window& win) {
         ImGui::BulletText(std::to_string(Registry::m_SimulationProperties.currentTime).c_str());
     }
     else {
-        ImGui::SliderFloat("##CurrentSimulationTime",&Registry::m_SimulationProperties.currentTime,0,pausedSimulationTime);
-        
+        float time = (float)Registry::m_SimulationProperties.currentTime;
+        ImGui::SliderFloat("##CurrentSimulationTime",&time,0,(float)pausedSimulationTime);
+        Registry::m_SimulationProperties.currentTime = time;
     }
 
     if(m_Tabs[m_CurrentTab].propertiesFunctions.size() > 0){
@@ -175,10 +176,10 @@ void GuiLayer::UpdateGraphs() {
             break;
         }
 
-        std::map<std::string,float> mapWithData;
-        if(!PY_TRY_CAST((mapWithData = dictWithGraphData.cast<std::map<std::string,float>>()))){
+        std::map<std::string,double> mapWithData;
+        if(!PY_TRY_CAST((mapWithData = dictWithGraphData.cast<std::map<std::string,double>>()))){
             stringstream ss;
-            ss << "Result of function from graph: " << graphWrapper.first << " was not equal to a dict with string keys and float values";
+            ss << "Result of function from graph: " << graphWrapper.first << " was not equal to a dict with string keys and double values";
             GuiLayer::AddErrorMsg(ss.str());
             continue;
         }

@@ -30,7 +30,7 @@ std::unordered_map<std::string,std::unique_ptr<Window>>& RegistryGetters::SubWin
     return Registry::m_SubWindows;
 }
 
-float RegistryGetters::DeltaTime() {
+double RegistryGetters::DeltaTime() {
     return Registry::m_DeltaTime;
 }
 

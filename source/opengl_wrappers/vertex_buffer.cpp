@@ -34,7 +34,7 @@ void VertexBuffer::Generate() {
         DEBUG_LOG("Calling 'VertexBuffer::Generate' without the proper creation order, check if calling 'VertexArray::SetVertexBuffer' or 'VertexBuffer::CreateNew'...");
         return;
     }
-    float size;
+    double size;
     for(auto& attribute : m_AttributeTempMemory){
         size += attribute.offsetSize;
     }

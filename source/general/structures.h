@@ -52,24 +52,24 @@ namespace GraphType {
 
 struct SimulationPropertiesStorage {
     bool paused = true;
-    float currentTime = 0;
+    double currentTime = 0;
 
 };
 
 struct PythonGraphWrapper {
     PythonGraphWrapper(): name(""),graphType(GraphType::Bars){
-        graphUpdateFunction = [](float deltaTime,float currentSimulationTime){return py::dict();};
+        graphUpdateFunction = [](double deltaTime,double currentSimulationTime){return py::dict();};
     }
 
     std::string name;
     GraphType::PythonGraphTypes graphType;
-    std::function<py::dict(float,float)> graphUpdateFunction;
+    std::function<py::dict(double,double)> graphUpdateFunction;
 };
 
 struct GuiGraphWrapper {
-    std::function<void(std::map<std::string,std::vector<float>>&)> graphFunction = [](std::map<std::string,std::vector<float>>& map){};
-    std::map<std::string,std::vector<float>> graphData;
-    std::vector<std::pair<float,std::map<std::string,float>>> graphUpdateTimeLog;
+    std::function<void(std::map<std::string,std::vector<double>>&)> graphFunction = [](std::map<std::string,std::vector<double>>& map){};
+    std::map<std::string,std::vector<double>> graphData;
+    std::vector<std::pair<double,std::map<std::string,double>>> graphUpdateTimeLog;
     PythonGraphWrapper wrapper;
 };
 
