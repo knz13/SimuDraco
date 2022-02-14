@@ -120,6 +120,8 @@ void GuiLayer::CreatePropertiesPanel(Window& win) {
         }
     }
 
+    ImGui::BulletText("Simulation Time Scale");
+    ImGui::SliderFloat("##SimulationTimeScale",&Registry::m_SimulationProperties.timeScale,0,1);
 
     ImGui::BulletText("Current Simulation Time");
     if(!Registry::m_SimulationProperties.paused){

@@ -53,7 +53,7 @@ namespace GraphType {
 struct SimulationPropertiesStorage {
     bool paused = true;
     double currentTime = 0;
-
+    float timeScale = 1;
 };
 
 struct PythonGraphWrapper {

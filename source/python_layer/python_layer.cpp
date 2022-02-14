@@ -62,22 +62,21 @@ bool PythonLayer::PythonLayer::LoadPythonFile(std::string filepath) {
     std::vector<std::string> loadedTabs;
     
     for(auto& item : locals){
-        if(py::type::of(item.second).equal(py::type::of(py::globals()["__builtins__"]))){
-            PY_CALL(py::globals()[item.first] = item.second);
-            continue;
-        };
         if(py::type::of(item.second).equal(type)){
            
             py::object obj;
-            if(!PY_ASSERT(obj = item.second())){
+            std::string errorMsg = "";
+            if(!PY_ASSERT(obj = item.second(),&errorMsg)){
+                GuiLayer::AddErrorMsg(errorMsg);
                 return false;
             }
             py::list my_list;
-            if(!PY_ASSERT(my_list = py::globals()["get_public_variable_names"](obj))){
+            if(!PY_ASSERT(my_list = py::globals()["get_public_variable_names"](obj),&errorMsg)){
+                GuiLayer::AddErrorMsg(errorMsg);
                 return false;
             }
             std::vector<std::string> my_vec;
-            if(!PY_ASSERT(my_vec = my_list.cast<std::vector<std::string>>())){
+            if(!PY_TRY_CAST(my_vec = my_list.cast<std::vector<std::string>>())){
                 return false;
             }
             
@@ -98,6 +97,9 @@ bool PythonLayer::PythonLayer::LoadPythonFile(std::string filepath) {
             }
             GuiLayer::SetCurrentTab(tab.name);
             m_LoadedFilePerTab[tab.name] = filepath;
+       }
+       else {
+           PY_CALL(py::globals()[item.first] = item.second);
        }
     }
 

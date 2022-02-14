@@ -45,7 +45,7 @@ void Registry::MainLoop() {
     while(m_MainWindow.get()->IsOpen()){
 
         currentTime = glfwGetTime();
-        m_DeltaTime = static_cast<double>(currentTime - oldTime);
+        m_DeltaTime = static_cast<double>(currentTime - oldTime) * m_SimulationProperties.timeScale;
 
         oldTime = currentTime;
 
