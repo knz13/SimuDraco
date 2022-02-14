@@ -4,3 +4,4 @@
 /vendor
 .vscode
 /SimuDracoPython.egg-info
+CMakeSettings.json
