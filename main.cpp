@@ -6,7 +6,7 @@ namespace py = pybind11;
 int main(){
     
     WindowCreationProperties prop;
-    prop.title = "Hey I'm a window!";
+    prop.title = "SimuDraco";
     prop.width = 1280;
     prop.height = 720;
 
