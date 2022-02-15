@@ -58,7 +58,7 @@ void GuiLayer::Cleanup() {
 }
 
 void GuiLayer::CreateGraphPanel(Window& win) {
-    ImGui::Begin("Graphs",NULL,ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+    ImGui::Begin("Graphs",NULL,ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus);
     ImGui::SetWindowSize(ImVec2(4*win.Properties().width/6,win.Properties().height));
     ImGui::SetWindowPos(ImVec2(0,0));
 
@@ -78,7 +78,7 @@ void GuiLayer::CreatePropertiesPanel(Window& win) {
     static double pausedSimulationTime = 0;
 
 
-    ImGui::Begin("Properties",NULL,ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_MenuBar);
+    ImGui::Begin("Properties",NULL,ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoBringToFrontOnFocus);
     ImGui::SetWindowSize(ImVec2(2*win.Properties().width/6,win.Properties().height));
     ImGui::SetWindowPos(ImVec2(4*win.Properties().width/6,0));
 

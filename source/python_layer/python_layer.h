@@ -15,6 +15,7 @@ private:
     static std::string GetVariableTypeName(py::object obj,std::string varName);
     static bool HandleProperties(py::object obj, std::string varName,std::string varType,GuiTab& tab);
     static bool HandleGraphs(py::object obj, std::string varName,GuiTab& tab);
+    static bool HandleGraphProperties();
 
 
     static std::map<std::string,std::string> m_LoadedFilePerTab;

@@ -56,6 +56,20 @@ struct SimulationPropertiesStorage {
     float timeScale = 1;
 };
 
+namespace PythonGraphFlags{ 
+    enum GraphFlags {
+        None = 0,
+        AutoFitX = 1,
+        AutoFitY = 2
+    };
+};
+
+struct PythonGraphProperties {
+    std::string x_label = "x";
+    std::string y_label = "y";
+    int graphFlags = PythonGraphFlags::AutoFitX;
+};
+
 struct PythonGraphWrapper {
     PythonGraphWrapper(): name(""),graphType(GraphType::Bars){
         graphUpdateFunction = [](double deltaTime,double currentSimulationTime){return py::dict();};
@@ -63,8 +77,10 @@ struct PythonGraphWrapper {
 
     std::string name;
     GraphType::PythonGraphTypes graphType;
+    PythonGraphProperties properties;
     std::function<py::dict(double,double)> graphUpdateFunction;
 };
+
 
 struct GuiGraphWrapper {
     std::function<void(std::map<std::string,std::vector<double>>&)> graphFunction = [](std::map<std::string,std::vector<double>>& map){};

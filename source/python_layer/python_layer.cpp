@@ -5,16 +5,28 @@
 PYBIND11_EMBEDDED_MODULE(SimuDracoPython,m){
     m.doc() = "Simulador para draco";
 
+    py::enum_<PythonGraphFlags::GraphFlags>(m,"GraphFlags",py::arithmetic())
+        .value("None",PythonGraphFlags::None)
+        .value("AutoFitX",PythonGraphFlags::AutoFitX)
+        .value("AutoFitY",PythonGraphFlags::AutoFitY)
+        .export_values();
+
     py::enum_<GraphType::PythonGraphTypes>(m,"GraphType")
         .value("Bars",GraphType::Bars)
         .value("Lines",GraphType::Lines)
         .export_values();
     
+    py::class_<PythonGraphProperties>(m,"GraphProperties")
+        .def(py::init<>())
+        .def_readwrite("x_label",&PythonGraphProperties::x_label)
+        .def_readwrite("y_label",&PythonGraphProperties::y_label)
+        .def_readwrite("flags",&PythonGraphProperties::graphFlags);
     py::class_<PythonGraphWrapper>(m,"Graph")
         .def(py::init<>())
         .def_readwrite("name",&PythonGraphWrapper::name)
         .def_readwrite("graph_type",&PythonGraphWrapper::graphType)
-        .def_readwrite("graph_function",&PythonGraphWrapper::graphUpdateFunction);
+        .def_readwrite("graph_function",&PythonGraphWrapper::graphUpdateFunction)
+        .def_readwrite("graph_properties",&PythonGraphWrapper::properties);
     
 
 };
@@ -135,6 +147,7 @@ bool PythonLayer::HandleProperties(py::object obj, std::string varName,std::stri
 
 
 
+
     if(varType == "int"){
         tab.propertiesFunctions[varName] = [varName,showName](py::object thisObj){
             int var;
@@ -179,6 +192,25 @@ bool PythonLayer::HandleGraphs(py::object obj, std::string varName, GuiTab& tab)
         GuiLayer::DeleteTab(tab.name);
         return false;
     }
+
+    
+    ImPlotAxisFlags flagsX = ImPlotAxisFlags_RangeFit;
+    ImPlotAxisFlags flagsY = ImPlotAxisFlags_RangeFit;
+
+
+
+    // setting up graph properties
+    
+    if(wrapper.properties.graphFlags & PythonGraphFlags::AutoFitX){
+        flagsX |= ImPlotAxisFlags_AutoFit;
+    }
+
+    if(wrapper.properties.graphFlags & PythonGraphFlags::AutoFitY){
+        flagsY |= ImPlotAxisFlags_AutoFit;
+    }
+
+
+
     GuiGraphWrapper graphWrapper;
     graphWrapper.wrapper = wrapper;
     switch(wrapper.graphType){
@@ -188,9 +220,9 @@ bool PythonLayer::HandleGraphs(py::object obj, std::string varName, GuiTab& tab)
             return false;
         };
         graphWrapper.graphFunction = [=](std::map<std::string,std::vector<double>>& map){
-            ImPlotAxisFlags flags = ImPlotAxisFlags_RangeFit | ImPlotAxisFlags_AutoFit;
+            
             if(ImPlot::BeginPlot(wrapper.name.c_str())){
-                ImPlot::SetupAxes("X", "Y", flags, 0);
+                ImPlot::SetupAxes(wrapper.properties.x_label.c_str(), wrapper.properties.y_label.c_str(), flagsX, flagsY);
                 ImPlot::PlotBars(("##" + std::to_string(std::hash<std::string>()(wrapper.name))).c_str(),map["x"].data(),map["y"].data(),map["x"].size(),0.05f);
 
                 ImPlot::EndPlot();
@@ -206,9 +238,9 @@ bool PythonLayer::HandleGraphs(py::object obj, std::string varName, GuiTab& tab)
             return false;
         };
         graphWrapper.graphFunction = [=](std::map<std::string,std::vector<double>>& map){
-            ImPlotAxisFlags flags = ImPlotAxisFlags_RangeFit | ImPlotAxisFlags_AutoFit;
+
             if(ImPlot::BeginPlot(wrapper.name.c_str())){
-                ImPlot::SetupAxes("X", "Y", flags,0);
+                ImPlot::SetupAxes(wrapper.properties.x_label.c_str(), wrapper.properties.y_label.c_str(), flagsX,flagsY);
                 ImPlot::PlotLine(("##" + std::to_string(std::hash<std::string>()(wrapper.name))).c_str(),map["x"].data(),map["y"].data(),map["x"].size());
 
                 ImPlot::EndPlot();

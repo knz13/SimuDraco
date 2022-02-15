@@ -14,7 +14,7 @@ int main(){
     
     PythonLayer::Init();
     GuiLayer::Init(win);
-
+    
     Registry::MainLoop();
     
     GuiLayer::Cleanup();
