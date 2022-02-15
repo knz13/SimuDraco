@@ -12,7 +12,7 @@ Após ter baixado os programas acima, basta abrir o prompt de comando em seu com
 
 
 ```
-cd *caminho_para_o_diretório_que_deseja_utilizar*
+cd caminho_para_o_diretório_que_deseja_utilizar
 cmake --B build
 ```
 
