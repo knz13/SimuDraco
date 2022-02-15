@@ -22,8 +22,10 @@ cmake --B build
 Agora só aguardar que o cmake vai fazer todos os arquivos necessários para compilar no diretório build
 ## Passo 2...
 
-Depois que o processo anterior terminar, você terá diversos arquivos no diretório build.
-Agora só encontrar os arquivos específicos para sua máquina e rodá-los.
+Depois que o processo anterior terminar, você terá diversos arquivos no diretório build
+
+Agora só encontrar os arquivos específicos para sua máquina e rodá-los
+
 No visual studio, por exemplo, basta abrir o arquivo .sln e compilar o projeto SimuDraco
 
 # Exemplos
