@@ -175,7 +175,7 @@ if(NOT ${glew_exists})
     GIT_TAG glew-cmake-2.2.0
     CMAKE_ARGS  -DCMAKE_INSTALL_PREFIX:PATH=${PROJECT_SOURCE_DIR}/vendor/glew
                 -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-    BUILD_BYPRODUCTS ${PROJECT_SOURCE_DIR}/vendor/glew/lib/${CMAKE_STATIC_LIBRARY_PREFIX}glewd${CMAKE_STATIC_LIBRARY_SUFFIX}
+    BUILD_BYPRODUCTS ${PROJECT_SOURCE_DIR}/vendor/glew/lib/${CMAKE_STATIC_LIBRARY_PREFIX}glew$<$<CONFIG:Debug>:d>${CMAKE_STATIC_LIBRARY_SUFFIX}
     )
 
     list(APPEND DEPS_TO_BUILD GLEW)
@@ -254,7 +254,7 @@ endforeach()
     #linking for glew...
 
 
-    target_link_libraries(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/vendor/glew/lib/${CMAKE_STATIC_LIBRARY_PREFIX}glewd${CMAKE_STATIC_LIBRARY_SUFFIX})
+    target_link_libraries(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/vendor/glew/lib/${CMAKE_STATIC_LIBRARY_PREFIX}glew$<$<CONFIG:Debug>:d>${CMAKE_STATIC_LIBRARY_SUFFIX})
                 
 
     #linking for OpenGL...
