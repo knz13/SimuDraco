@@ -8,7 +8,7 @@ Protótipo de simulador feito para a equipe de competição DRACO VOLANS
 ## Passo 1...
 Primeiramente, é necessário baixar o repositório clicando no botão verde na parte de cima dessa página e em baixar repositório
 
-Para fazer a build é necessário ter baixado no mínimo cmake 3.18 e algum compilador para c/c++ em sua máquina
+Para fazer a build é necessário ter baixado no mínimo [cmake 3.18](https://cmake.org/download/) e [algum compilador para c/c++ em sua máquina](https://visualstudio.microsoft.com/pt-br/downloads/)
 
 Após ter baixado os programas acima, basta abrir o prompt de comando em seu computador e escrever o seguinte
 
