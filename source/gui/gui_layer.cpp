@@ -136,8 +136,15 @@ void GuiLayer::CreatePropertiesPanel(Window& win) {
     if(m_Tabs[m_CurrentTab].propertiesFunctions.size() > 0){
         ImGui::BulletText("Script Variables:");
     }
-    for(auto& func : m_Tabs[m_CurrentTab].propertiesFunctions){
-        func.second(m_Tabs[m_CurrentTab].objectReference);
+    std::string errorMsg;
+    auto it = m_Tabs[m_CurrentTab].propertiesFunctions.begin();
+    while(it != m_Tabs[m_CurrentTab].propertiesFunctions.end()){
+        if(!it->second(m_Tabs[m_CurrentTab].objectReference)){
+            it = m_Tabs[m_CurrentTab].propertiesFunctions.erase(it);
+        }
+        else {
+            it++;
+        }
     }
     
 

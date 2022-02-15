@@ -80,8 +80,12 @@ bool PythonLayer::PythonLayer::LoadPythonFile(std::string filepath) {
                 return false;
             }
             
-            
-            GuiTab& tab = GuiLayer::CreateTab(py::str(item.first).cast<std::string>());
+            std::string tabName = "";
+            if(!PY_TRY_CAST(tabName = py::str(item.first).cast<std::string>())){
+                GuiLayer::AddErrorMsg("Couldn't convert class name to string");
+                return false;
+            }
+            GuiTab& tab = GuiLayer::CreateTab(tabName);
             loadedTabs.push_back(tab.name);
             tab.objectReference = obj;
             
@@ -110,8 +114,11 @@ bool PythonLayer::PythonLayer::LoadPythonFile(std::string filepath) {
 
 std::string PythonLayer::PythonLayer::GetVariableTypeName(py::object obj, std::string varName) {
     std::string type;
-
-    PY_CALL(type = py::str(py::globals()["__builtins__"].attr("type")(obj.attr(varName.c_str())).attr("__name__")).cast<std::string>());
+    std::string errMsg;
+    if(!PY_TRY_CAST(type = py::str(py::globals()["__builtins__"].attr("type")(obj.attr(varName.c_str())).attr("__name__")).cast<std::string>(),&errMsg)){
+        GuiLayer::AddErrorMsg(errMsg);
+        return "";
+    }
 
 
     return type;
@@ -129,18 +136,30 @@ bool PythonLayer::HandleProperties(py::object obj, std::string varName,std::stri
 
 
     if(varType == "int"){
-        tab.propertiesFunctions[varName] = [=](py::object thisObj){
-            int var = thisObj.attr(py::str(varName)).cast<int>();
+        tab.propertiesFunctions[varName] = [varName,showName](py::object thisObj){
+            int var;
+            
+            if(!PY_TRY_CAST(var = thisObj.attr(py::str(varName)).cast<int>())){
+                GuiLayer::AddErrorMsg("Variable '" + varName + "' was initialized as integer but was changed during runtime.\nPlease make sure the initialized variable keeps the same type at all times.\nRemoving variable from properties panel.");
+                return false;
+            }
             ImGui::InputInt(showName.c_str(),&var);
             thisObj.attr(py::str(varName)) = var;
+            return true;
         };
         return true;
     }
     else if(varType == "float"){
-        tab.propertiesFunctions[varName] = [=](py::object thisObj){
-            double var = thisObj.attr(py::str(varName)).cast<double>();
+        tab.propertiesFunctions[varName] = [varName,showName](py::object thisObj){
+            double var;
+            
+            if(!PY_TRY_CAST(var = thisObj.attr(py::str(varName)).cast<double>())){
+                GuiLayer::AddErrorMsg("Variable '" + varName + "' was initialized as float but was changed during runtime.\nPlease make sure the initialized variable keeps the same type at all times.\nRemoving variable from properties panel.");
+                return false;
+            }
             ImGui::InputDouble(showName.c_str(),&var);
             thisObj.attr(py::str(varName)) = var;
+            return true;
         };
         return true;
     }
@@ -154,7 +173,9 @@ bool PythonLayer::HandleProperties(py::object obj, std::string varName,std::stri
 
 bool PythonLayer::HandleGraphs(py::object obj, std::string varName, GuiTab& tab) {
     PythonGraphWrapper wrapper;
-    if(!PY_ASSERT(wrapper = obj.attr(varName.c_str()).cast<PythonGraphWrapper>())){
+    std::string errMsg;
+    if(!PY_ASSERT(wrapper = obj.attr(varName.c_str()).cast<PythonGraphWrapper>(),&errMsg)){
+        GuiLayer::AddErrorMsg(errMsg);
         GuiLayer::DeleteTab(tab.name);
         return false;
     }

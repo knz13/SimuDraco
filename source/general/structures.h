@@ -83,7 +83,7 @@ struct GuiTab {
     py::object objectReference;
     
     std::unordered_map<std::string,GuiGraphWrapper> graphingFunctions;
-    std::unordered_map<std::string,std::function<void(py::object)>> propertiesFunctions;
+    std::unordered_map<std::string,std::function<bool(py::object)>> propertiesFunctions;
 
 };
 
